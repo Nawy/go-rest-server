@@ -1,6 +1,9 @@
 package model
 
+// HTTPMethodType is HTTP methods type for controlling params by type
 type HTTPMethodType string
+
+// HTTPStatusCode is HTTP status code type for controlling params by type
 type HTTPStatusCode int
 
 const (
@@ -29,4 +32,7 @@ const (
 	HTTP_BAD_REQUEST = HTTPStatusCode(400)
 	UNATHORIZED      = HTTPStatusCode(401)
 	HTTP_NOT_FOUND   = HTTPStatusCode(404)
+
+	HTTP_INTERNAL_SERVER_ERROR = HTTPStatusCode(500)
+	HTTP_NOT_IMPLEMENTED       = HTTPStatusCode(501)
 )

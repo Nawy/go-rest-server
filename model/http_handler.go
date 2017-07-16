@@ -2,48 +2,79 @@ package model
 
 import "net/http"
 
-type HTTPHandlerFunc func(http.ResponseWriter, *http.Request)
+// ResponseEntity groups response
+type ResponseEntity struct {
+	Body    interface{}
+	Headers map[string]string
+}
 
+// HTTPFilterFunc type for filter function
+type HTTPFilterFunc func(*HTTPContext)
+
+// HTTPHandlerFunc type for handler function
+type HTTPHandlerFunc func(*HTTPContext) *ResponseEntity
+
+// HTTPHandler handler object
 type HTTPHandler struct {
-	Method  HTTPMethodType
-	URI     string
-	Handler HTTPHandlerFunc
+	Method         HTTPMethodType
+	URI            string
+	IncomeFilters  []HTTPFilterFunc
+	OutcomeFilters []HTTPFilterFunc
+	Handler        HTTPHandlerFunc
+	Dispatcher     func(http.ResponseWriter, *http.Request)
 }
 
-func CreateHTTPHandler(method HTTPMethodType, uri string) *HTTPHandler {
-	h := &HTTPHandler{method, uri, nil}
-	h.Handler = func(w http.ResponseWriter, r *http.Request) {
-		if !h.isCorrectMethod(r) {
-			panic("Wrong http method, you should use " + string(h.Method))
+// MakeRequestHandler make handlers chain
+func MakeRequestHandler(method HTTPMethodType, uri string) *HTTPHandler {
+	h := &HTTPHandler{method, uri, nil, nil, nil, nil}
+	h.Dispatcher = func(response http.ResponseWriter, request *http.Request) {
+
+		context := &HTTPContext{response, request}
+
+		if !h.isCorrectMethod(request) {
+			context.WriteError("Wrong http method, you should use "+string(h.Method), HTTP_BAD_REQUEST)
+			return
+		}
+
+		for _, incomeFilter := range h.IncomeFilters {
+			incomeFilter(context)
+		}
+
+		responseEntity := h.Handler(context)
+
+		if responseEntity != nil && responseEntity.Body != nil {
+			context.WriteBody(&responseEntity.Body)
+		}
+
+		for _, outcomeFilter := range h.OutcomeFilters {
+			outcomeFilter(context)
 		}
 	}
 	return h
 }
 
-func (h *HTTPHandler) HandleOp(handler HTTPHandlerFunc) *HTTPHandler {
-	beforeHandler := h.Handler
-	h.Handler = func(w http.ResponseWriter, r *http.Request) {
-		beforeHandler(w, r)
-		handler(w, r)
-	}
+// SetHandler sets handler
+func (h *HTTPHandler) SetHandler(handler HTTPHandlerFunc) *HTTPHandler {
+	h.Handler = handler
 	return h
 }
 
-func (h *HTTPHandler) HandleOps(handlers ...HTTPHandlerFunc) *HTTPHandler {
-	beforeHandler := h.Handler
-	h.Handler = func(w http.ResponseWriter, r *http.Request) {
-		beforeHandler(w, r)
-		for _, handler := range handlers {
-			handler(w, r)
-		}
-	}
+// SetIncome set income filters, remember order is importent
+func (h *HTTPHandler) SetIncome(filter ...HTTPFilterFunc) *HTTPHandler {
+	h.IncomeFilters = filter
 	return h
 }
 
+// SetOutcome set income filters, remember order is importent
+func (h *HTTPHandler) SetOutcome(filter ...HTTPFilterFunc) *HTTPHandler {
+	h.OutcomeFilters = filter
+	return h
+}
+
+// isCorrectMethod checks HTTP method
 func (h *HTTPHandler) isCorrectMethod(r *http.Request) bool {
 	if r.Method == string(h.Method) {
 		return true
 	}
-
 	return false
 }
