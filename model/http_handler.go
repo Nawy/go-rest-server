@@ -78,3 +78,18 @@ func (h *HTTPHandler) isCorrectMethod(r *http.Request) bool {
 	}
 	return false
 }
+
+// FullResponse create response with body and headers
+func FullResponse(body interface{}, headers map[string]string) *ResponseEntity {
+	return &ResponseEntity{Body: body, Headers: headers}
+}
+
+// BodyResponse create body response
+func BodyResponse(body interface{}) *ResponseEntity {
+	return &ResponseEntity{Body: body, Headers: nil}
+}
+
+// HeaderResponse create header response
+func HeaderResponse(headers map[string]string) *ResponseEntity {
+	return &ResponseEntity{Body: nil, Headers: headers}
+}
