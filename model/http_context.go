@@ -17,9 +17,9 @@ type HTTPContext struct {
 }
 
 // GetBody return scpecific JSON body
-func (c *HTTPContext) GetBody(bodyHolder interface{}) (interface{}, error) {
+func (c *HTTPContext) GetBody(bodyHolder interface{}) error {
 	decoder := json.NewDecoder(c.Request.Body)
-	return bodyHolder, decoder.Decode(bodyHolder)
+	return decoder.Decode(bodyHolder)
 }
 
 // WriteBody write JSON body to response
