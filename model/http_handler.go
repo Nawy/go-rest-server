@@ -93,3 +93,7 @@ func BodyResponse(body interface{}) *ResponseEntity {
 func HeaderResponse(headers map[string]string) *ResponseEntity {
 	return &ResponseEntity{Body: nil, Headers: headers}
 }
+
+func EmptyResponse() *ResponseEntity {
+	return &ResponseEntity{Body: nil, Headers: nil}
+}
