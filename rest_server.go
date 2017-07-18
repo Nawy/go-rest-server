@@ -2,10 +2,11 @@ package rest
 
 import (
 	"fmt"
-	model "go-rest-server/model"
 	"net/http"
 	"strconv"
 	"strings"
+
+	model "github.com/Nawy/go-rest-server/model"
 )
 
 type RestServer struct {

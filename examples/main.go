@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	rest "go-rest-server"
-	model "go-rest-server/model"
+
+	rest "github.com/Nawy/go-rest-server"
+	model "github.com/Nawy/go-rest-server/model"
 )
 
 type SimpleJSON struct {
